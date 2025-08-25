@@ -1,21 +1,46 @@
-import { mailtrapClient, sender } from "./mailtrap.config.js";
 
+import { VERIFICATION_EMAIL_TEMPLATE } from "./emailTemplates.js";
+import { transport, sender } from "./mailtrap.config.js";
+
+// Function to send verification email
 export const sendVerificationEmail = async (email, verificationToken) => {
-	const recipient = [{ email }];
+  try {
+    const info = await transport.sendMail({
+      from: `"${sender.name}" <${sender.email}>`,
+      to: email,
+      subject: "Verify your email",
+      html: VERIFICATION_EMAIL_TEMPLATE.replace(
+        "{verificationCode}",
+        verificationToken
+      ),
+    });
 
-	try {
-		const response = await mailtrapClient.send({
-			from: sender,
-			to: recipient,
-			subject: "Verify your email",
-			html: VERIFICATION_EMAIL_TEMPLATE.replace("{verificationCode}", verificationToken),
-			category: "Email Verification",
-		});
+    console.log("Email sent successfully:", info.messageId);
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    throw new Error(`Error sending verification email: ${error.message}`);
+  }
+};
 
-		console.log("Email sent successfully", response);
-	} catch (error) {
-		console.error(`Error sending verification`, error);
+// Function to send welcome email
+export const sendWelcomeEmail = async (email, name) => {
+  try {
+    const info = await transport.sendMail({
+      from: `"${sender.name}" <${sender.email}>`,
+      to: email,
+      subject: "Welcome to Our App ",
+      html: `
+        <h1>Welcome, ${name}!</h1>
+        <p>Your email has been successfully verified </p>
+        <p>You can now log in and start using our app </p>
+        <br/>
+        <p>– ${sender.name}</p>
+      `,
+    });
 
-		throw new Error(`Error sending verification email: ${error}`);
-	}
+    console.log("Welcome email sent successfully:", info.messageId);
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
+    throw new Error(`Error sending welcome email: ${error.message}`);
+  }
 };
