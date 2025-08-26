@@ -44,3 +44,20 @@ export const sendWelcomeEmail = async (email, name) => {
     throw new Error(`Error sending welcome email: ${error.message}`);
   }
 };
+
+
+export const sendPasswordResetEmail = async (email, resetURL) => {
+  try {
+    const response = await transport.sendMail({
+      from: `"${sender.name}" <${sender.email}>`,
+      to: email,
+      subject: "Reset your password",
+      html: PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL),
+    });
+
+    return response; // return response so you can log it if needed
+  } catch (error) {
+    console.error(`Error sending password reset email`, error);
+    throw new Error(`Error sending password reset email: ${error}`);
+  }
+};
